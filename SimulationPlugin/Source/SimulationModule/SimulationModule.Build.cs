@@ -80,5 +80,32 @@ public class SimulationModule : ModuleRules
             // Stage Proj data files
             RuntimeDependencies.Add("$(BinaryOutputDir)/proj-data/*", Path.Combine(ProjRedistFolder, "proj-data/*"), StagedFileType.SystemNonUFS);
         }
+        else if(Target.Platform == UnrealTargetPlatform.HoloLens)
+        {
+            List<string> RuntimeModuleNames = new List<string>();
+            RuntimeModuleNames.Add("jpeg62.dll");
+            RuntimeModuleNames.Add("lzma.dll");
+            RuntimeModuleNames.Add("sqlite3.dll");
+            RuntimeModuleNames.Add("tiff.dll");
+            RuntimeModuleNames.Add("zlib.dll");
+            string ProjRedistFolder = Path.Combine(ModuleDirectory, @"..\ThirdParty\Proj\redist\arm64");
+
+
+            foreach (string RuntimeModuleName in RuntimeModuleNames)
+            {
+                string ModulePath = Path.Combine(ProjRedistFolder, RuntimeModuleName);
+                if (!File.Exists(ModulePath))
+                {
+                    string Err = string.Format("PROJ SDK module '{0}' not found.", ModulePath);
+                    System.Console.WriteLine(Err);
+                    throw new BuildException(Err);
+                }
+                //PublicDelayLoadDLLs.Add(RuntimeModuleName);
+                RuntimeDependencies.Add("$(BinaryOutputDir)/" + RuntimeModuleName, ModulePath);
+            }
+
+            // Stage Proj data files
+            RuntimeDependencies.Add("$(BinaryOutputDir)/proj-data/*", Path.Combine(ProjRedistFolder, "proj-data/*"), StagedFileType.SystemNonUFS);
+        }
     }
 }
